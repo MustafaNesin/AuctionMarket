@@ -1,0 +1,50 @@
+﻿@page "/Account/Register"
+@inherits BaseComponent
+@attribute [AllowAnonymous]
+
+<PageTitle>Register</PageTitle>
+<MudCard Class="mx-auto" Style="max-width: 400px">
+    <MudCardHeader>
+        <MudText Typo="@Typo.h6">Register</MudText>
+    </MudCardHeader>
+    <MudCardContent>
+        <MudForm @ref="@_form" Model="@_command">
+            <MudTextField @bind-Value="@_command.FirstName"
+                          Validation="@_validator.ValidateValue"
+                          For="@(() => _command.FirstName)"
+                          Label="First Name"/>
+            <MudTextField @bind-Value="@_command.LastName"
+                          Validation="@_validator.ValidateValue"
+                          For="@(() => _command.LastName)"
+                          Label="Last Name"/>
+            <MudTextField @bind-Value="@_command.UserName"
+                          Validation="@_validator.ValidateValue"
+                          For="@(() => _command.UserName)"
+                          Label="User Name"/>
+            <MudTextField @bind-Value="@_command.Password"
+                          Validation="@_validator.ValidateValue"
+                          For="@(() => _command.Password)"
+                          Label="Password"
+                          HelperText="Choose a strong password"
+                          InputType="@InputType.Password"/>
+            <MudTextField T="string"
+                          Validation="@PasswordMatch"
+                          Label="Password"
+                          HelperText="Repeat the password"
+                          InputType="@InputType.Password"/>
+        </MudForm>
+    </MudCardContent>
+    <MudCardActions>
+        <MudLink Href="/Account/Login" Typo="@Typo.body2">
+            Do you have an account?
+        </MudLink>
+        <MudSpacer/>
+        <MudButton Variant="@Variant.Filled"
+                   Color="@Color.Primary"
+                   Class="ml-auto"
+                   Disabled="@_isSubmitDisabled"
+                   OnClick="@OnSubmitAsync">
+            Submit
+        </MudButton>
+    </MudCardActions>
+</MudCard>

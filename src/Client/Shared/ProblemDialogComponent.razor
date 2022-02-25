@@ -1,0 +1,36 @@
+﻿<MudDialog>
+    <TitleContent>
+        <MudText Typo="@Typo.h6">
+            <MudIcon Icon="@Icons.Filled.Error" Class="mr-3 mb-n1"/>
+            Error
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        @if (ProblemDetails?.Title is not null)
+        {
+            <MudText>@ProblemDetails.Title</MudText>
+        }
+        @if (ProblemDetails?.Detail is not null)
+        {
+            <MudText Style="white-space: pre-line"> @ProblemDetails.Detail</MudText>
+        }
+        @if (ProblemDetails?.Instance is not null)
+        {
+            <MudText>
+                @ProblemDetails.Instance
+            </MudText>
+        }
+        @if (ProblemDetails?.Extensions is not null)
+        {
+            foreach (var (key, value) in ProblemDetails.Extensions)
+            {
+                <MudText>
+                    @key: @value
+                </MudText>
+            }
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="@Color.Primary" OnClick="Close">Ok</MudButton>
+    </DialogActions>
+</MudDialog>

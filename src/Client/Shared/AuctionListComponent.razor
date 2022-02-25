@@ -1,0 +1,193 @@
+﻿@using AuctionMarket.Shared.Domain.Extensions
+@using AuctionMarket.Shared.Domain.Enumerations
+@using AuctionMarket.Shared.Domain.Abstractions.Queries
+@using AuctionMarket.Shared.Domain.DTOs
+@inherits BaseComponent
+
+<MudTable ServerData="@OnServerReload" Hover="@true" @ref="@_table">
+    <ToolBarContent>
+        <MudText Typo="@Typo.h6">Auction List</MudText>
+        <MudSpacer/>
+        @if (WinnerName is null)
+        {
+            <MudSelect @bind-Value="@_status" Label="Status" Class="mt-n3 mr-3">
+                <MudSelectItem Value="@(default(AuctionStatus?))">
+                    Any
+                </MudSelectItem>
+                <MudSelectItem Value="@((AuctionStatus?)AuctionStatus.NotStarted)">
+                    Not Started
+                </MudSelectItem>
+                <MudSelectItem Value="@((AuctionStatus?)AuctionStatus.Active)">
+                    Open
+                </MudSelectItem>
+                <MudSelectItem Value="@((AuctionStatus?)AuctionStatus.Ended)">
+                    Ended
+                </MudSelectItem>
+            </MudSelect>
+        }
+        <MudTextField T="string" @bind-Value="@_searchQuery"
+                      Placeholder="Search in auctions..."
+                      Adornment="@Adornment.Start" AdornmentIcon="@Icons.Filled.Search"
+                      IconSize="@Size.Medium" Class="mt-n3"/>
+        <MudButton Color="@Color.Primary" OnClick="@OnSearch" Disabled="@_isSearchDisabled">
+            Search
+        </MudButton>
+    </ToolBarContent>
+    <HeaderContent>
+        <MudTh>
+            <MudTableSortLabel SortLabel="@GetAuctionListQueryBase.TitleSortLabel" T="AuctionDto">
+                Title
+            </MudTableSortLabel>
+        </MudTh>
+        @if (CreatorName is null)
+        {
+            <MudTh>
+                <MudTableSortLabel SortLabel="@GetAuctionListQueryBase.CreatorSortLabel" T="AuctionDto">
+                    Creator
+                </MudTableSortLabel>
+            </MudTh>
+        }
+        <MudTh>
+            <MudTableSortLabel SortLabel="@GetAuctionListQueryBase.CreatedAtSortLabel" 
+                               InitialDirection="@SortDirection.Descending" T="AuctionDto">
+                Created At
+            </MudTableSortLabel>
+        </MudTh>
+        <MudTh>
+            <MudTableSortLabel SortLabel="@GetAuctionListQueryBase.StartingPriceSortLabel" T="AuctionDto">
+                Starting Price
+            </MudTableSortLabel>
+        </MudTh>
+        <MudTh>
+            <MudTableSortLabel SortLabel="@GetAuctionListQueryBase.MinIncrementSortLabel" T="AuctionDto">
+                Min. Increment
+            </MudTableSortLabel>
+        </MudTh>
+        @if (WinnerName is null)
+        {
+            <MudTh>
+                <MudTableSortLabel SortLabel="@GetAuctionListQueryBase.LastBidderSortLabel" T="AuctionDto">
+                    Last Bidder
+                </MudTableSortLabel>
+            </MudTh>
+        }
+        <MudTh>
+            <MudTableSortLabel SortLabel="@GetAuctionListQueryBase.LastBidAtSortLabel" T="AuctionDto">
+                Last Bid At
+            </MudTableSortLabel>
+        </MudTh>
+        <MudTh>
+            <MudTableSortLabel SortLabel="@GetAuctionListQueryBase.LastBidValueSortLabel" T="AuctionDto">
+                Last Bid
+            </MudTableSortLabel>
+        </MudTh>
+        <MudTh>
+            <MudTableSortLabel SortLabel="@GetAuctionListQueryBase.StartsAtSortLabel" T="AuctionDto">
+                Starts At
+            </MudTableSortLabel>
+        </MudTh>
+        <MudTh>
+            <MudTableSortLabel SortLabel="@GetAuctionListQueryBase.EndsAtSortLabel" T="AuctionDto">
+                Ends At
+            </MudTableSortLabel>
+        </MudTh>
+        @if (Status is null)
+        {
+            <MudTh>
+                <MudTableSortLabel SortLabel="@GetAuctionListQueryBase.StatusSortLabel" T="AuctionDto">
+                    Status
+                </MudTableSortLabel>
+            </MudTh>
+        }
+        <MudTh/>
+    </HeaderContent>
+    <RowTemplate>
+        @{
+            var lastBid = context.Bids.SingleOrDefault();
+            var statusLabel = context.GetStatus(DateTime.Now) switch {
+                AuctionStatus.NotStarted => "Not Started",
+                AuctionStatus.Active => "Open",
+                AuctionStatus.Ended => "Ended",
+                _ => "Unknown"
+                };
+            var link = $"/Auction/Detail/{context.Id}";
+        }
+        <MudTd DataLabel="Title">
+            @context.Title
+        </MudTd>
+        @if (CreatorName is null)
+        {
+            <MudTd DataLabel="Creator" Class="ws-nowrap">
+                @if (context.CreatedBy is not null)
+                {
+                    var userLink = $"/User/Profile/{context.CreatedBy.UserName}";
+
+                    <MudAvatar Size="@Size.Small" Color="@Color.Primary">
+                        @context.CreatedBy.Initials
+                    </MudAvatar>
+                    <MudLink Href="@userLink" Color="@Color.Inherit">
+                        @context.CreatedBy.FullName
+                    </MudLink>
+                }
+            </MudTd>
+        }
+        <MudTd DataLabel="Created At">
+            @context.CreatedAt!.Value.ToString("MMMM d, yyyy HH:mm")
+        </MudTd>
+        <MudTd DataLabel="Starting Price">
+            @context.StartingPrice!.Value.ToString("N2")$
+        </MudTd>
+        <MudTd DataLabel="Min. Increment">
+            @context.MinBidIncrement!.Value.ToString("F2")%
+        </MudTd>
+        @if (WinnerName is null)
+        {
+            <MudTd DataLabel="Last Bidder" Class="ws-nowrap">
+                @if (lastBid?.CreatedBy is not null)
+                {
+                    var userLink = $"/User/Profile/{lastBid.CreatedBy.UserName}";
+
+                    <MudAvatar Size="@Size.Small" Color="@Color.Primary">
+                        @lastBid.CreatedBy?.Initials
+                    </MudAvatar>
+                    <MudLink Href="@userLink" Color="@Color.Inherit">
+                        @lastBid.CreatedBy?.FullName
+                    </MudLink>
+                }
+            </MudTd>
+        }
+        <MudTd DataLabel="Last Bid At">
+            @lastBid?.CreatedAt!.Value.ToString("MMMM d, yyyy HH:mm")
+        </MudTd>
+        <MudTd DataLabel="Last Bid">
+            @if (lastBid is not null)
+            {
+                @:@lastBid.Value!.Value.ToString("N2")$
+            }
+        </MudTd>
+        <MudTd DataLabel="Starts At">
+            @context.StartsAt!.Value.ToString("MMMM d, yyyy HH:mm")
+        </MudTd>
+        <MudTd DataLabel="Ends At">
+            @context.EndsAt!.Value.ToString("MMMM d, yyyy HH:mm")
+        </MudTd>
+        @if (Status is null)
+        {
+            <MudTd DataLabel="Status">
+                @statusLabel
+            </MudTd>
+        }
+        <MudTd>
+            <MudLink Href="@link">Details</MudLink>
+        </MudTd>
+    </RowTemplate>
+    <NoRecordsContent>
+        <MudText>No matching auctions found.</MudText>
+    </NoRecordsContent>
+    <LoadingContent>
+        <MudText>Loading...</MudText>
+    </LoadingContent>
+    <PagerContent>
+        <MudTablePager PageSizeOptions="@(new[] { 5, 10, 25, 50 })"/>
+    </PagerContent>
+</MudTable>

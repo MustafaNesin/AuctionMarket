@@ -1,0 +1,38 @@
+﻿@page "/Account/Login"
+@inherits BaseComponent
+@attribute [AllowAnonymous]
+
+<PageTitle>Login</PageTitle>
+<MudCard Class="mx-auto" Style="max-width: 400px">
+    <MudCardHeader>
+        <MudText Typo="@Typo.h6">Login</MudText>
+    </MudCardHeader>
+    <MudCardContent>
+        <MudForm @ref="@_form" Model="@_command">
+            <MudTextField @bind-Value="@_command.UserName"
+                          Validation="@_validator.ValidateValue"
+                          For="@(() => _command.UserName)"
+                          Label="User Name"
+                          AutoFocus="@true"/>
+            <MudTextField @bind-Value="@_command.Password"
+                          Validation="@_validator.ValidateValue"
+                          For="@(() => _command.Password)"
+                          Label="Password"
+                          InputType="@InputType.Password"/>
+            <MudCheckBox @bind-Checked="@_command.RememberLogin"
+                         Label="Remember me"/>
+        </MudForm>
+    </MudCardContent>
+    <MudCardActions>
+        <MudLink Href="/Account/Register" Typo="@Typo.body2">
+            Don't have an account?
+        </MudLink>
+        <MudSpacer/>
+        <MudButton Variant="@Variant.Filled"
+                   Color="@Color.Primary"
+                   Disabled="@_isSubmitDisabled"
+                   OnClick="@OnSubmitAsync">
+            Submit
+        </MudButton>
+    </MudCardActions>
+</MudCard>

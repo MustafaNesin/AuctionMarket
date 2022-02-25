@@ -1,0 +1,68 @@
+﻿@page "/User/Profile/{UserName}"
+@inherits BaseComponent
+
+@* ReSharper disable once ConditionIsAlwaysTrueOrFalse *@
+@if (_user is not null)
+{
+    <PageTitle>@_user.FullName</PageTitle>
+    <MudCard Class="mb-3">
+        <MudCardHeader>
+            <MudAvatar Color="@Color.Primary" Class="mr-3">
+                @_user.Initials
+            </MudAvatar>
+            <MudText Typo="@Typo.h6">
+                @_user.FullName
+                <MudText Typo="@Typo.body2">@@admin</MudText>
+            </MudText>
+            @if (_user.Role is not null)
+            {
+                <MudSpacer/>
+                <MudButton Color="@Color.Primary"
+                           Variant="@Variant.Filled"
+                           DisableElevation="@true"
+                           DisableRipple="@true">
+                    @_user.Role.Name
+                </MudButton>
+            }
+        </MudCardHeader>
+        <MudCardContent>
+            @if (_user.Biography is not null)
+            {
+                <MudText>@_user.Biography</MudText>
+                <MudDivider Class="my-3"/>
+            }
+            @if (_user.CreatedAt is not null)
+            {
+                <MudText>
+                    Registered at <b>@_user.CreatedAt.Value.ToString("MMMM d, yyyy HH:mm")</b>
+                </MudText>
+            }
+            @if (_totalAssets.HasValue)
+            {
+                <MudText>Assets: <b>@_totalAssets.Value</b></MudText>
+            }
+            @if (_totalBids.HasValue)
+            {
+                <MudText>Bids: <b>@_totalBids.Value</b></MudText>
+            }
+            @if (_totalAuctions.HasValue)
+            {
+                <MudText>Auctions: <b>@_totalAuctions.Value</b></MudText>
+            }
+        </MudCardContent>
+    </MudCard>
+    <MudTabs ApplyEffectsToContainer="@true" Centered="@true" Elevation="2" KeepPanelsAlive="@true" Rounded="@true">
+        <MudTabPanel Text="Assets">
+            <AuctionListComponent @ref="@_assets" WinnerName="@UserName"
+                                  TotalItemsChanged="@OnTotalAssetsChanged"/>
+        </MudTabPanel>
+        <MudTabPanel Text="Bids">
+            <AuctionListComponent @ref="@_bids" BidderName="@UserName"
+                                  TotalItemsChanged="@OnTotalBidsChanged"/>
+        </MudTabPanel>
+        <MudTabPanel Text="Auctions">
+            <AuctionListComponent @ref="@_auctions" CreatorName="@UserName"
+                                  TotalItemsChanged="@OnTotalAuctionsChanged"/>
+        </MudTabPanel>
+    </MudTabs>
+}

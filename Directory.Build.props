@@ -1,0 +1,6 @@
+<Project>
+  <PropertyGroup>
+    <AssemblyName>AuctionMarket.$(MSBuildProjectName.Replace(" ", "_"))</AssemblyName>
+    <RootNamespace>$(AssemblyName)</RootNamespace>
+  </PropertyGroup>
+</Project>

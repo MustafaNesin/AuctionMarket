@@ -1,0 +1,65 @@
+﻿@page "/Auction/Create"
+@inherits BaseComponent
+
+<PageTitle>Create Auction</PageTitle>
+<MudCard Class="mx-auto" Style="max-width: 400px">
+    <MudCardHeader>
+        <MudText Typo="@Typo.h6">Create an Auction</MudText>
+    </MudCardHeader>
+    <MudCardContent>
+        <MudForm @ref="@_form" Model="@_command">
+            <MudTextField @bind-Value="@_command.Auction.Title"
+                          For="@(() => _command.Auction.Title)"
+                          Label="Title"
+                          AutoFocus="@true"/>
+            <MudTextField @bind-Value="@_command.Auction.Description"
+                          Validation="@_validator.ValidateValue"
+                          For="@(() => _command.Auction.Description)"
+                          Label="Description"/>
+            <MudNumericField @bind-Value="@_command.Auction.StartingPrice"
+                             Validation="@_validator.ValidateValue"
+                             For="@(() => _command.Auction.StartingPrice)"
+                             Label="Starting Price"
+                             HelperText="Minimum value for the initial bid"
+                             Adornment="@Adornment.End"
+                             AdornmentIcon="@Icons.Filled.AttachMoney"
+                             Min="0"
+                             HideSpinButtons="@true"/>
+            <MudNumericField @bind-Value="@_command.Auction.MinBidIncrement"
+                             Validation="@_validator.ValidateValue"
+                             For="@(() => _command.Auction.MinBidIncrement)"
+                             Label="Min. Bid Value Increment"
+                             HelperText="Percentage where the new bid must be greater than the last bid"
+                             Adornment="@Adornment.End"
+                             AdornmentIcon="@Icons.Filled.Percent"
+                             Min="0"
+                             Step="10"
+                             Format="F2"/>
+            <MudTextField @bind-Value="@_command.Auction.StartsAt"
+                          Validation="@_validator.ValidateValue"
+                          For="@(() => _command.Auction.StartsAt)"
+                          Label="Starts At"
+                          HelperText="Auction start date"
+                          T="DateTime?"
+                          Format="s"
+                          InputType="@InputType.DateTimeLocal"/>
+            <MudTextField @bind-Value="@_command.Auction.EndsAt"
+                          Validation="@_validator.ValidateValue"
+                          For="@(() => _command.Auction.EndsAt)"
+                          Label="Ends At"
+                          HelperText="Auction end date"
+                          T="DateTime?"
+                          Format="s"
+                          InputType="@InputType.DateTimeLocal"/>
+        </MudForm>
+    </MudCardContent>
+    <MudCardActions>
+        <MudButton Variant="@Variant.Filled"
+                   Color="@Color.Primary"
+                   Class="ml-auto"
+                   Disabled="@_isSubmitDisabled"
+                   OnClick="@OnSubmitAsync">
+            Submit
+        </MudButton>
+    </MudCardActions>
+</MudCard>

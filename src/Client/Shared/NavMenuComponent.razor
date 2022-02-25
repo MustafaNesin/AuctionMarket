@@ -1,0 +1,34 @@
+﻿@inherits BaseComponent
+
+<AuthorizeView>
+    <Authorized>
+        @if (StateContainer.User?.FullName is not null)
+        {
+            var link = $"/User/Profile/{StateContainer.User.UserName}";
+
+            <MudElement>
+                <MudAvatar Color="@Color.Primary" Class="mr-3">
+                    @StateContainer.User.Initials
+                </MudAvatar>
+                <MudLink Href="@link" Color="@Color.Default">
+                    @StateContainer.User.FullName
+                </MudLink>
+            </MudElement>
+        }
+        <MudDivider Class="my-3"/>
+        <MudNavMenu>
+            <MudNavLink Href="/User/Deposit" Icon="@Icons.Filled.AttachMoney">Deposit</MudNavLink>
+            <MudNavGroup Title="Auctions" Icon="@Icons.Filled.ShoppingCart" Expanded="true">
+                <MudNavLink Href="/Auction/Create" Icon="@Icons.Filled.Create">Create</MudNavLink>
+                <MudNavLink Href="/Auction/List" Icon="@Icons.Filled.List">List</MudNavLink>
+            </MudNavGroup>
+            <MudNavLink Href="/Account/Logout" Icon="@Icons.Filled.Logout">Logout</MudNavLink>
+        </MudNavMenu>
+    </Authorized>
+    <NotAuthorized>
+        <MudNavMenu>
+            <MudNavLink Href="/Account/Login" Icon="@Icons.Filled.Login">Login</MudNavLink>
+            <MudNavLink Href="/Account/Register" Icon="@Icons.Filled.PersonAdd">Register</MudNavLink>
+        </MudNavMenu>
+    </NotAuthorized>
+</AuthorizeView>

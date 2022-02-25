@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+    <title>Auction Market</title>
+    <base href="/"/>
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet"/>
+    <link href="_content/MudBlazor/MudBlazor.min.css" rel="stylesheet"/>
+    <link href="app.css" rel="stylesheet"/>
+    <!--<link href="AuctionMarket.Client.styles.css" rel="stylesheet"/>-->
+</head>
+
+<body>
+<div id="app">
+    <div id="loading-bar" role="progressbar" aria-valuenow="0"
+         class="mud-progress-circular mud-progress-large mud-progress-indeterminate">
+        <svg class="mud-progress-circular-svg" viewBox="22 22 44 44">
+            <circle class="mud-progress-circular-circle mud-progress-indeterminate"
+                    cx="44" cy="44" r="20" fill="none" stroke-width="3">
+            </circle>
+        </svg>
+    </div>
+</div>
+
+<div id="blazor-error-ui">
+    An unhandled error has occurred.
+    <a href="" class="reload">Reload</a>
+    <a class="dismiss">🗙</a>
+</div>
+<script src="_framework/blazor.webassembly.js"></script>
+<script src="_content/Microsoft.AspNetCore.Components.WebAssembly.Authentication/AuthenticationService.js"></script>
+<script src="_content/MudBlazor/MudBlazor.min.js"></script>
+</body>
+
+</html>

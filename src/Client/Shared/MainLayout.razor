@@ -1,0 +1,36 @@
+﻿@inherits BaseLayout
+
+<MudThemeProvider @bind-IsDarkMode="@IsDarkMode"/>
+<MudDialogProvider/>
+<MudSnackbarProvider/>
+
+<MudLayout>
+    <MudAppBar>
+        <MudIconButton Icon="@Icons.Filled.Menu"
+                       Color="@Color.Inherit"
+                       Edge="@Edge.Start"
+                       OnClick="@(_ => OnDrawerToggle())"/>
+        Auction Market
+        <MudSpacer/>
+        <AuthorizeView>
+            <Authorized>
+                @if (StateContainer.User?.Balance is not null)
+                {
+                    <MudText Class="mr-3">
+                        Balance: <b>@StateContainer.User.Balance.Value.ToString("N2")$</b>
+                    </MudText>
+                }
+            </Authorized>
+        </AuthorizeView>
+        <MudToggleIconButton @bind-Toggled="@IsDarkMode" Color="@Color.Inherit"
+                             Icon="@Icons.Filled.DarkMode" ToggledIcon="@Icons.Filled.LightMode"/>
+    </MudAppBar>
+    <MudDrawer @bind-Open="@_isDrawerOpen" Class="pa-3">
+        <NavMenuComponent/>
+    </MudDrawer>
+    <MudMainContent>
+        <div class="ma-6">
+            @Body
+        </div>
+    </MudMainContent>
+</MudLayout>

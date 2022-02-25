@@ -1,0 +1,32 @@
+﻿@page "/User/Deposit"
+@inherits BaseComponent
+
+<PageTitle>Deposit Money</PageTitle>
+<MudCard Class="mx-auto" Style="max-width: 400px">
+    <MudCardHeader>
+        <MudText Typo="@Typo.h6">Deposit</MudText>
+    </MudCardHeader>
+    <MudCardContent>
+        <MudForm @ref="@_form" Model="@_command">
+            <MudNumericField @bind-Value="@_command.Value"
+                             Validation="@_validator.ValidateValue"
+                             For="@(() => _command.Value)"
+                             Label="Value"
+                             HelperText="The amount you want to deposit into your account"
+                             Adornment="@Adornment.End"
+                             AdornmentIcon="@Icons.Filled.AttachMoney"
+                             Min="10"
+                             HideSpinButtons="true"
+                             AutoFocus="@true"/>
+        </MudForm>
+    </MudCardContent>
+    <MudCardActions>
+        <MudButton Variant="@Variant.Filled"
+                   Color="@Color.Primary"
+                   Class="ml-auto"
+                   Disabled="@_isSubmitDisabled"
+                   OnClick="@OnSubmitAsync">
+            Submit
+        </MudButton>
+    </MudCardActions>
+</MudCard>

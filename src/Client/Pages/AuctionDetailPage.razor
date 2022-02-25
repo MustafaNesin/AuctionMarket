@@ -1,0 +1,201 @@
+﻿@page "/Auction/Detail/{Id:int}"
+@using AuctionMarket.Shared.Domain.Extensions
+@using AuctionMarket.Shared.Domain.Enumerations
+@inherits BaseComponent
+
+@* ReSharper disable once ConditionIsAlwaysTrueOrFalse *@
+@if (_auction is not null)
+{
+    var status = _auction.GetStatus(DateTime.Now);
+    var lastBid = _auction.Bids.FirstOrDefault();
+
+    <PageTitle>@_auction.Title</PageTitle>
+    <MudGrid>
+        <MudItem xs="12" sm="6" md="8">
+            <MudPaper Class="pa-3 my-3">
+                <MudElement Class="d-flex">
+                    <MudElement>
+                        <MudText Typo="@Typo.h5">
+                            @_auction.Title
+                        </MudText>
+                        @if (_auction.CreatedBy?.FullName is not null)
+                        {
+                            var userLink = $"/User/Profile/{_auction.CreatedBy.UserName}";
+
+                            <MudText Typo="@Typo.body2">
+                                by
+                                <MudLink Href="@userLink">
+                                    <b>@_auction.CreatedBy.FullName</b>
+                                </MudLink>
+                            </MudText>
+                        }
+                    </MudElement>
+                    <MudSpacer/>
+                    @if (_auction.CreatedBy?.UserName == _userName)
+                    {
+                        var link = $"/Auction/Edit/{_auction.Id}";
+                        
+                        <MudLink Href="@link" Underline="@Underline.None" Class="mr-3 mt-1">
+                            <MudButton StartIcon="@Icons.Filled.Edit" aria-label="edit">
+                                Edit
+                            </MudButton>
+                        </MudLink>
+                    }
+                    <MudElement>
+                        <MudBadge Content="@_watchCount" Color="@Color.Primary" Origin="@Origin.BottomCenter"
+                                  Overlap="@true" Class="pb-1">
+                            <MudIcon Icon="@Icons.Filled.RemoveRedEye" Title="Currently viewing this auction"/>
+                        </MudBadge>
+                    </MudElement>
+                </MudElement>
+            </MudPaper>
+            <MudPaper Class="pa-3 my-3">
+                @switch (status)
+                {
+                    case AuctionStatus.NotStarted:
+                        <MudText>
+                            This auction has not started yet.
+                            It will start at @_auction.StartsAt.Value.ToString("MMMM d, yyyy HH:mm")
+                        </MudText>
+                        break;
+                    case AuctionStatus.Active:
+                        var d = (DateTime.UtcNow.Ticks - _auction.StartsAt.Value.Ticks) * 100.0 /
+                                (_auction.EndsAt.Value.Ticks - _auction.StartsAt.Value.Ticks);
+
+                        <MudText>Open to bidding!</MudText>
+                        <MudProgressLinear Class="mt-3" Color="@Color.Primary" Rounded="@true" Size="@Size.Large"
+                                           Value="@d"/>
+                        break;
+                    case AuctionStatus.Ended:
+                        <MudText>
+                            This auction has ended at @_auction.EndsAt.Value.ToString("MMMM d, yyyy HH:mm")
+                        </MudText>
+                        break;
+                    case AuctionStatus.Unknown:
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            </MudPaper>
+            <MudPaper Class="pa-3 my-3">
+                @if (_auction.Description is not null)
+                {
+                    <MudText Typo="@Typo.subtitle1">
+                        @_auction.Description
+                    </MudText>
+                    <MudDivider Class="my-3"/>
+                }
+                <MudText Class="mt-3">
+                    Starting price is <b>@_auction.StartingPrice.Value.ToString("N2")$</b>
+                </MudText>
+                <MudText Class="mt-3">
+                    Min. bid value increment is <b>@_auction.MinBidIncrement.Value.ToString("F2")%</b>
+                </MudText>
+                <MudText Class="mt-3">
+                    The bidding starts at <b>@_auction.StartsAt.Value.ToString("MMMM d, yyyy HH:mm")</b>
+                </MudText>
+                <MudText Class="mt-3">
+                    The bidding closes at <b>@_auction.EndsAt.Value.ToString("MMMM d, yyyy HH:mm")</b>
+                </MudText>
+            </MudPaper>
+        </MudItem>
+        <MudItem xs="12" sm="6" md="4">
+            @if (lastBid is not null)
+            {
+                var userLink = $"/User/Profile/{lastBid.CreatedBy.UserName}";
+
+                <MudPaper Class="pa-3 my-3">
+                    <MudText Typo="@Typo.h6">Last Bid</MudText>
+                    <MudText Class="mt-3">
+                        <b>@lastBid.Value.Value.ToString("N2")$</b>
+                        by
+                        <MudLink Href="@userLink">
+                            <b>@lastBid.CreatedBy.FullName</b>
+                        </MudLink>
+                        at <b>@lastBid.CreatedAt.Value.ToString("MMMM d, yyyy HH:mm")</b>
+                    </MudText>
+                </MudPaper>
+            }
+            @if (status == AuctionStatus.Active && _auction.CreatedBy!.UserName != StateContainer.User.UserName)
+            {
+                <MudPaper Class="pa-3 my-3">
+                    <MudText Typo="@Typo.h6">Bid</MudText>
+                    @if (lastBid is not null && lastBid.CreatedBy.UserName == StateContainer.User.UserName)
+                    {
+                        <MudText Class="mt-3">
+                            You cannot make a new bid on this auction since the last bid is yours.
+                        </MudText>
+                    }
+                    else if (StateContainer.User.Balance < _minBidValue)
+                    {
+                        <MudText Class="mt-3">
+                            Your balance is insufficient.
+                        </MudText>
+                    }
+                    else
+                    {
+                        <MudForm @ref="@_bidForm" Model="@_bidCommand" Class="d-flex">
+                            <MudElement Class="flex-grow-1">
+                                <MudNumericField
+                                    @bind-Value="@_bidCommand.Value"
+                                    Validation="@_bidValidator.ValidateValue"
+                                    For="@(() => _bidCommand.Value)"
+                                    Label="Price"
+                                    HelperText="Your price for this auction"
+                                    Variant="@Variant.Text"
+                                    Adornment="@Adornment.End"
+                                    AdornmentIcon="@Icons.Filled.AttachMoney"
+                                    HideSpinButtons="@true"
+                                    Min="@_minBidValue"
+                                    AutoFocus="@true"/>
+                            </MudElement>
+                            <MudElement Class="ml-3">
+                                <MudButton
+                                    Variant="@Variant.Filled"
+                                    Color="@Color.Primary"
+                                    Class="mt-3"
+                                    Disabled="@(_isSubmitBidDisabled || StateContainer.User.Balance < _minBidValue)"
+                                    OnClick="@OnSubmitBidAsync">
+                                    Submit
+                                </MudButton>
+                            </MudElement>
+                        </MudForm>
+                    }
+                </MudPaper>
+            }
+            @if (lastBid is not null)
+            {
+                <MudTable Class="pa-3 my-3" Items="@_auction.Bids" Height="400px" Hover="@true" FixedHeader="@true">
+                    <ToolBarContent>
+                        <MudText Typo="@Typo.h6">Bidding History</MudText>
+                    </ToolBarContent>
+                    <HeaderContent>
+                        <MudTh>By</MudTh>
+                        <MudTh>At</MudTh>
+                        <MudTh>Value</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd DataLabel="By" Class="ws-nowrap">
+                            @if (context.CreatedBy is not null)
+                            {
+                                var userLink = $"/User/Profile/{context.CreatedBy.UserName}";
+
+                                <MudAvatar Size="@Size.Small" Color="@Color.Primary">
+                                    @context.CreatedBy.Initials
+                                </MudAvatar>
+                                <MudLink Href="@userLink" Color="@Color.Inherit">
+                                    @context.CreatedBy.FullName
+                                </MudLink>
+                            }
+                        </MudTd>
+                        <MudTd DataLabel="At">
+                            @context.CreatedAt.Value.ToString("MMMM d, yyyy HH:mm")
+                        </MudTd>
+                        <MudTd DataLabel="Value">
+                            @context.Value$
+                        </MudTd>
+                    </RowTemplate>
+                </MudTable>
+            }
+        </MudItem>
+    </MudGrid>
+}
