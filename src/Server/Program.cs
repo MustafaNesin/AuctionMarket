@@ -26,9 +26,7 @@ builder.Services.AddDbContext<IAppDbContext, AppDbContext>(
         sqliteOptions => sqliteOptions.MigrationsAssembly(
             typeof(AppDbContext).Assembly.GetName().Name)));
 
-if (builder.Environment.IsDevelopment())
-    builder.Services.AddScoped<IDataSeeder, TestDataSeeder>();
-
+builder.Services.AddScoped<IDataSeeder, TestDataSeeder>();
 builder.Services.AddSingleton<ICurrentAccountService, CurrentAccountService>();
 builder.Services.AddAutoMapper(typeof(UserProfile));
 builder.Services.AddMediatR(typeof(LoginAccountCommandHandler));
